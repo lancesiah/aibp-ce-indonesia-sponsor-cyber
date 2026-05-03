@@ -1,92 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-  *, *::before, *::after { box-sizing: border-box; }
-  body { margin: 0; padding: 0; background: transparent; font-family: 'Outfit', sans-serif; }
+  .aibp-combined-section, .aibp-combined-section * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  .aibp-combined-section { padding: clamp(40px, 8vw, 80px) 20px; background: #ffffff; font-family: 'Outfit', sans-serif; }
+  .aibp-inner-grid { width: 100%; max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: start; }
 
-  .agenda-container { background: #212b5a; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(33,43,90,0.15); color: #fff; min-height: 450px; }
-  .day-nav { display: flex; background: rgba(0,0,0,0.2); }
-  .day-btn { flex: 1; padding: 20px; border: none; background: transparent; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px; color: rgba(255,255,255,0.5); transition: 0.2s; }
-  .day-btn.active { color: #fff; background: rgba(255,255,255,0.05); position: relative; }
-  .day-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #b11116; }
+  .aibp-about-eyebrow { display: inline-block; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.3px; color: #b11116; margin-bottom: 12px; }
+  .aibp-about-copy h2 { margin: 0 0 20px; font-size: clamp(28px, 4.5vw, 44px); line-height: 1.15; color: #212b5a; }
+  .aibp-about-copy p { color: #4b5563; font-size: 17px; margin: 0 0 24px; line-height: 1.6; }
 
-  .accordion-item { border-bottom: 1px solid rgba(255,255,255,0.08); }
-  .accordion-header { width: 100%; padding: 22px 20px; display: grid; grid-template-columns: 85px 1fr 24px; align-items: center; cursor: pointer; background: none; border: none; text-align: left; font-family: 'Outfit', sans-serif; }
-  .acc-time { font-weight: 700; color: #ff5e62; font-size: 13px; letter-spacing: 0.5px; }
-  .acc-title { font-weight: 700; color: #fff; font-size: 15px; line-height: 1.4; padding-right: 10px; }
-  .acc-icon { font-size: 22px; color: rgba(255,255,255,0.4); transition: transform 0.2s ease; }
-  .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: rgba(0,0,0,0.1); }
-  .content-inner { padding: 0 44px 22px 105px; font-size: 14px; color: #cbd5e1; line-height: 1.6; }
-  .accordion-item.is-open .acc-icon { transform: rotate(45deg); color: #ff5e62; }
-  .accordion-item.is-open .accordion-content { max-height: 500px; }
-  .msg { padding: 40px; text-align: center; color: rgba(255,255,255,0.4); font-family: 'Outfit', sans-serif; }
+  .topic-instruction { font-weight: 700; color: #212b5a; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .topics-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 25px; }
+  .topic-pill { background: #f1f4f9; border: 1px solid #e2e8f0; padding: 12px 15px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 60px; }
+  .topic-pill:hover { border-color: #b11116; color: #b11116; background: #fffcfc; }
+  .topic-pill.active { background: #b11116; color: white; border-color: #b11116; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(177, 17, 22, 0.2); }
+
+  .topic-detail-box { background: #f8faff; border-radius: 12px; padding: 20px; border-left: 4px solid #b11116; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
+  .topic-detail-box h4 { margin: 0 0 8px; color: #212b5a; font-size: 18px; }
+  .topic-detail-box p { margin: 0; font-size: 15px; color: #64748b; line-height: 1.5; }
+
+  .agenda-wrapper { padding-top: 80px; }
+  .agenda-iframe { width: 100%; border: none; border-radius: 20px; display: block; min-height: 800px; }
+
+  @media (max-width: 1024px) { .aibp-inner-grid { grid-template-columns: 1fr; gap: 40px; } .agenda-wrapper { padding-top: 0; } }
+  @media (max-width: 768px) { .aibp-about-copy { text-align: center; } }
 </style>
-</head>
-<body>
-<div class="agenda-container">
-  <div class="day-nav">
-    <button id="btn-day1" class="day-btn active" onclick="switchDay('day1')">Day 1: 26 Aug</button>
-    <button id="btn-day2" class="day-btn" onclick="switchDay('day2')">Day 2: 27 Aug</button>
+
+<section class="aibp-combined-section">
+  <div class="aibp-inner-grid">
+
+    <!-- LEFT COLUMN: TOPICS -->
+    <div class="aibp-about-copy">
+      <span class="aibp-about-eyebrow">Topics and agenda</span>
+      <h2>Accelerating Indonesia's Digital Leap</h2>
+      <p>Explore the strategic pillars of growth and innovation as we convene the nation's top enterprise and government leaders.</p>
+      <p class="topic-instruction">Click a topic to explore highlights:</p>
+      <div class="topics-container">
+        <div class="topic-pill active" onclick="showTopic(this, 'data-ai')">Data &amp; AI</div>
+        <div class="topic-pill" onclick="showTopic(this, 'automation')">Automation</div>
+        <div class="topic-pill" onclick="showTopic(this, 'indonesia-4')">Indonesia 4.0</div>
+        <div class="topic-pill" onclick="showTopic(this, 'risk')">Risk Management</div>
+        <div class="topic-pill" onclick="showTopic(this, 'banking')">Banking</div>
+        <div class="topic-pill" onclick="showTopic(this, 'smart-city')">Smart City</div>
+        <div class="topic-pill" onclick="showTopic(this, 'awards')">Innovation Awards</div>
+      </div>
+      <div class="topic-detail-box" id="topic-detail">
+        <h4 id="topic-title">How Data and Artificial Intelligence Can Fuel Indonesia's Digital Leap</h4>
+        <p id="topic-desc">Discover how Indonesian enterprises are leveraging advanced analytics and generative AI to drive operational efficiency and market growth.</p>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: AGENDA via iframe -->
+    <div class="agenda-wrapper">
+      <iframe
+        id="agendaFrame"
+        class="agenda-iframe"
+        src="https://lancesiah.github.io/aibp-ce-indonesia-sponsor-cyber/"
+        scrolling="no">
+      </iframe>
+    </div>
+
   </div>
-  <div id="day1" class="agenda-day" style="display:block;"><div class="msg">Loading...</div></div>
-  <div id="day2" class="agenda-day" style="display:none;"><div class="msg">Loading...</div></div>
-</div>
+</section>
 
 <script>
-  // Tab names exactly as they appear in your Google Sheet
-  var DAY1_SHEET = 'Day 1: 26 August';
-  var DAY2_SHEET = 'Day 2: 27 August';
-  var BASE_URL   = 'https://sheetdb.io/api/v1/aii6pr8cqy9d1';
+  // Auto-resize iframe to fit full agenda content
+  window.addEventListener('message', function(e) {
+    if (e.data && e.data.iframeHeight) {
+      var frame = document.getElementById('agendaFrame');
+      if (frame) frame.style.height = (e.data.iframeHeight + 20) + 'px';
+    }
+  });
 
-  function buildHTML(rows) {
-    var html = '';
-    rows.forEach(function(row) {
-      var time  = (row['Time']        || '').trim();
-      var title = (row['Session']     || '').trim();
-      var desc  = (row['Description'] || '').trim();
-      if (!time || !title) return;
-      html += '<div class="accordion-item">'
-            + '<button class="accordion-header" onclick="toggleAcc(this)">'
-            + '<span class="acc-time">' + time + '</span>'
-            + '<span class="acc-title">' + title + '</span>'
-            + '<span class="acc-icon">+</span>'
-            + '</button>'
-            + '<div class="accordion-content"><div class="content-inner">' + desc + '</div></div>'
-            + '</div>';
-    });
-    return html || '<div class="msg">No sessions found.</div>';
+  var topicData = {
+    'data-ai':    { title: "How Data and Artificial Intelligence Can Fuel Indonesia's Digital Leap", desc: "Discover how Indonesian enterprises are leveraging advanced analytics and generative AI to drive operational efficiency and market growth." },
+    'automation': { title: "Shaping Tomorrow: Automation in the Future Workplace", desc: "Examining the synergy between human talent and robotic process automation (RPA) to redefine workforce productivity." },
+    'indonesia-4':{ title: "Indonesia 4.0: Technology for Sustainable Development", desc: "Aligning industrial growth with ESG goals through IoT, green energy tech, and smart manufacturing processes." },
+    'risk':       { title: "Managing Risks in the Digital Age", desc: "Strengthening cybersecurity frameworks and data privacy to protect Indonesia's expanding digital economy." },
+    'banking':    { title: "Modernising Banking", desc: "The evolution of fintech, digital payments, and core banking systems to enhance financial inclusion across the archipelago." },
+    'smart-city': { title: "Smart City Indonesia", desc: "Building resilient urban infrastructure through integrated data platforms and citizen-centric digital services." },
+    'awards':     { title: "AIBP Enterprise Innovation Awards", desc: "Celebrating the companies and leaders driving groundbreaking digital transformation projects in Indonesia." }
+  };
+
+  function showTopic(el, key) {
+    document.querySelectorAll('.topic-pill').forEach(function(p) { p.classList.remove('active'); });
+    el.classList.add('active');
+    document.getElementById('topic-title').innerText = topicData[key].title;
+    document.getElementById('topic-desc').innerText = topicData[key].desc;
   }
-
-  function loadDay(sheet, elementId) {
-    var el = document.getElementById(elementId);
-    var url = BASE_URL + '?sheet=' + encodeURIComponent(sheet);
-    fetch(url)
-      .then(function(r) { return r.json(); })
-      .then(function(rows) { el.innerHTML = buildHTML(rows); })
-      .catch(function() { el.innerHTML = '<div class="msg" style="color:#ff5e62;">Failed to load. Please refresh.</div>'; });
-  }
-
-  function switchDay(id) {
-    document.querySelectorAll('.agenda-day').forEach(function(d) { d.style.display = 'none'; });
-    document.querySelectorAll('.day-btn').forEach(function(b) { b.classList.remove('active'); });
-    document.getElementById(id).style.display = 'block';
-    document.getElementById(id === 'day1' ? 'btn-day1' : 'btn-day2').classList.add('active');
-  }
-
-  function toggleAcc(btn) {
-    var item = btn.parentElement;
-    var isOpen = item.classList.contains('is-open');
-    item.parentElement.querySelectorAll('.accordion-item').forEach(function(i) { i.classList.remove('is-open'); });
-    if (!isOpen) item.classList.add('is-open');
-  }
-
-  // Load both days on page load
-  loadDay(DAY1_SHEET, 'day1');
-  loadDay(DAY2_SHEET, 'day2');
 </script>
-</body>
-</html>

@@ -6,7 +6,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; }
-  body { margin: 0; padding: 0; background: transparent; font-family: 'Outfit', sans-serif; overflow: hidden; }
+  body { margin: 0; padding: 0; background: transparent; font-family: 'Outfit', sans-serif; }
 
   .agenda-container { background: #212b5a; border-radius: 20px; overflow: visible; box-shadow: 0 20px 50px rgba(33,43,90,0.15); color: #fff; }
   .day-nav { display: flex; background: rgba(0,0,0,0.2); border-radius: 20px 20px 0 0; }
@@ -14,15 +14,33 @@
   .day-btn.active { color: #fff; background: rgba(255,255,255,0.05); position: relative; }
   .day-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #b11116; }
 
+  /* Accordion */
   .accordion-item { border-bottom: 1px solid rgba(255,255,255,0.08); }
-  .accordion-header { width: 100%; padding: 22px 20px; display: grid; grid-template-columns: 85px 1fr 24px; align-items: center; cursor: pointer; background: none; border: none; text-align: left; font-family: 'Outfit', sans-serif; }
-  .acc-time { font-weight: 700; color: #ff5e62; font-size: 13px; letter-spacing: 0.5px; }
-  .acc-title { font-weight: 700; color: #fff; font-size: 15px; line-height: 1.4; padding-right: 10px; }
-  .acc-icon { font-size: 22px; color: rgba(255,255,255,0.4); transition: transform 0.2s ease; }
-  .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: rgba(0,0,0,0.1); }
-  .content-inner { padding: 0 44px 22px 105px; font-size: 14px; color: #cbd5e1; line-height: 1.6; }
+  .accordion-header { width: 100%; padding: 18px 20px; display: grid; grid-template-columns: 75px 1fr 24px; align-items: start; cursor: pointer; background: none; border: none; text-align: left; font-family: 'Outfit', sans-serif; gap: 10px; }
+  .acc-time { font-weight: 700; color: #ff5e62; font-size: 13px; letter-spacing: 0.5px; padding-top: 3px; }
+  .acc-header-content { display: flex; flex-direction: column; gap: 3px; }
+  .acc-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ff5e62; opacity: 0.8; }
+  .acc-title { font-weight: 700; color: #fff; font-size: 15px; line-height: 1.4; }
+  .acc-icon { font-size: 22px; color: rgba(255,255,255,0.4); transition: transform 0.2s ease; padding-top: 2px; }
+
+  .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: rgba(0,0,0,0.15); }
+  .content-inner { padding: 16px 20px 20px 105px; }
   .accordion-item.is-open .acc-icon { transform: rotate(45deg); color: #ff5e62; }
-  .accordion-item.is-open .accordion-content { max-height: 500px; }
+  .accordion-item.is-open .accordion-content { max-height: 2000px; }
+
+  /* Content sections */
+  .acc-description { font-size: 14px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px; white-space: pre-line; }
+  .acc-speaker { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 14px; white-space: pre-line; }
+  .acc-speaker strong { color: #e2e8f0; display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* Interactive tabs for G, H, I */
+  .sponsor-tabs { border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; overflow: hidden; margin-top: 4px; }
+  .sponsor-tab-nav { display: flex; background: rgba(0,0,0,0.2); }
+  .sponsor-tab-btn { flex: 1; padding: 8px 10px; border: none; background: transparent; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; border-right: 1px solid rgba(255,255,255,0.08); }
+  .sponsor-tab-btn:last-child { border-right: none; }
+  .sponsor-tab-btn.active { color: #fff; background: rgba(177,17,22,0.3); }
+  .sponsor-tab-content { padding: 14px; font-size: 13px; color: #cbd5e1; line-height: 1.6; white-space: pre-line; min-height: 40px; }
+
   .msg { padding: 40px; text-align: center; color: rgba(255,255,255,0.4); font-family: 'Outfit', sans-serif; }
 </style>
 </head>
@@ -42,24 +60,77 @@
   var BASE_URL   = 'https://sheetdb.io/api/v1/aii6pr8cqy9d1';
 
   function sendHeight() {
-    var h = document.getElementById('agendaContainer').offsetHeight;
+    var h = document.getElementById('agendaContainer').scrollHeight;
     window.parent.postMessage({ iframeHeight: h }, '*');
+  }
+
+  function makeTabs(g, h, i, uid) {
+    // Only show tabs box if at least one has content
+    if (!g && !h && !i) return '';
+    var tabs = [
+      { label: 'X',             content: g },
+      { label: 'Session Chair', content: h },
+      { label: 'Gold +',        content: i }
+    ].filter(function(t) { return t.content; });
+
+    if (tabs.length === 0) return '';
+
+    var navHtml = tabs.map(function(t, idx) {
+      return '<button class="sponsor-tab-btn' + (idx === 0 ? ' active' : '') + '" onclick="switchTab(this,\'' + uid + '\',' + idx + ')">' + t.label + '</button>';
+    }).join('');
+
+    var contentHtml = tabs.map(function(t, idx) {
+      return '<div class="sponsor-tab-content" id="tab-' + uid + '-' + idx + '" style="display:' + (idx === 0 ? 'block' : 'none') + '">' + t.content.replace(/\n/g, '<br>') + '</div>';
+    }).join('');
+
+    return '<div class="sponsor-tabs"><div class="sponsor-tab-nav">' + navHtml + '</div>' + contentHtml + '</div>';
+  }
+
+  function switchTab(btn, uid, idx) {
+    var nav = btn.parentElement;
+    nav.querySelectorAll('.sponsor-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var tabs = nav.parentElement.querySelectorAll('.sponsor-tab-content');
+    tabs.forEach(function(t) { t.style.display = 'none'; });
+    document.getElementById('tab-' + uid + '-' + idx).style.display = 'block';
+    setTimeout(sendHeight, 100);
   }
 
   function buildHTML(rows) {
     var html = '';
-    rows.forEach(function(row) {
-      var time  = (row['Time']        || '').trim();
-      var title = (row['Session']     || '').trim();
-      var desc  = (row['Description'] || '').trim();
-      if (!time || !title) return;
+    rows.forEach(function(row, i) {
+      // Columns: A=Time, B=Session(eyebrow), C=Format(skip), D=Session Title, E=Description, F=Speaker, G=X, H=Session Chair, I=Gold+
+      var time  = (row['Time']          || '').trim();
+      var eye   = (row['Session']       || '').trim();
+      var title = (row['Session Title'] || '').trim();
+      var desc  = (row['Description']   || '').trim();
+      var spk   = (row['speaker']       || '').trim();
+      var g     = (row['x']             || '').trim();
+      var h     = (row['Session Chair'] || '').trim();
+      var ii    = (row['Gold +']        || '').trim();
+
+      if (!time && !title) return;
+
+      var uid = 'r' + i;
+      var tabsHtml = makeTabs(g, h, ii, uid);
+
+      var bodyHtml = '';
+      if (desc) bodyHtml += '<div class="acc-description">' + desc.replace(/\n/g, '<br>') + '</div>';
+      if (spk)  bodyHtml += '<div class="acc-speaker"><strong>Speakers</strong>' + spk.replace(/\n/g, '<br>') + '</div>';
+      if (tabsHtml) bodyHtml += tabsHtml;
+
+      var hasContent = bodyHtml.length > 0;
+
       html += '<div class="accordion-item">'
-            + '<button class="accordion-header" onclick="toggleAcc(this)">'
+            + '<button class="accordion-header"' + (hasContent ? ' onclick="toggleAcc(this)"' : '') + ' style="' + (!hasContent ? 'cursor:default;' : '') + '">'
             + '<span class="acc-time">' + time + '</span>'
-            + '<span class="acc-title">' + title + '</span>'
-            + '<span class="acc-icon">+</span>'
+            + '<div class="acc-header-content">'
+            + (eye ? '<span class="acc-eyebrow">' + eye + '</span>' : '')
+            + '<span class="acc-title">' + (title || '—') + '</span>'
+            + '</div>'
+            + (hasContent ? '<span class="acc-icon">+</span>' : '<span class="acc-icon" style="opacity:0">+</span>')
             + '</button>'
-            + '<div class="accordion-content"><div class="content-inner">' + desc + '</div></div>'
+            + '<div class="accordion-content"><div class="content-inner">' + bodyHtml + '</div></div>'
             + '</div>';
     });
     return html || '<div class="msg">No sessions found.</div>';
@@ -91,9 +162,9 @@
   function toggleAcc(btn) {
     var item = btn.parentElement;
     var isOpen = item.classList.contains('is-open');
-    item.parentElement.querySelectorAll('.accordion-item').forEach(function(i) { i.classList.remove('is-open'); });
+    document.querySelectorAll('.accordion-item').forEach(function(i) { i.classList.remove('is-open'); });
     if (!isOpen) item.classList.add('is-open');
-    setTimeout(sendHeight, 350);
+    setTimeout(sendHeight, 450);
   }
 
   loadDay(DAY1_SHEET, 'day1');

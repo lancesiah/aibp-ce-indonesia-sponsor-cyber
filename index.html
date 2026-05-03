@@ -14,7 +14,6 @@
   .day-btn.active { color: #fff; background: rgba(255,255,255,0.05); position: relative; }
   .day-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #b11116; }
 
-  /* Accordion */
   .accordion-item { border-bottom: 1px solid rgba(255,255,255,0.08); }
   .accordion-header { width: 100%; padding: 18px 20px; display: grid; grid-template-columns: 75px 1fr 24px; align-items: start; cursor: pointer; background: none; border: none; text-align: left; font-family: 'Outfit', sans-serif; gap: 10px; }
   .acc-time { font-weight: 700; color: #ff5e62; font-size: 13px; letter-spacing: 0.5px; padding-top: 3px; }
@@ -28,18 +27,16 @@
   .accordion-item.is-open .acc-icon { transform: rotate(45deg); color: #ff5e62; }
   .accordion-item.is-open .accordion-content { max-height: 2000px; }
 
-  /* Content sections */
-  .acc-description { font-size: 14px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px; white-space: pre-line; }
-  .acc-speaker { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 14px; white-space: pre-line; }
+  .acc-description { font-size: 14px; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px; white-space: pre-line; }
+  .acc-speaker { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 16px; white-space: pre-line; }
   .acc-speaker strong { color: #e2e8f0; display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; }
 
-  /* Interactive tabs for G, H, I */
-  .sponsor-tabs { border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; overflow: hidden; margin-top: 4px; }
-  .sponsor-tab-nav { display: flex; background: rgba(0,0,0,0.2); }
-  .sponsor-tab-btn { flex: 1; padding: 8px 10px; border: none; background: transparent; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; border-right: 1px solid rgba(255,255,255,0.08); }
-  .sponsor-tab-btn:last-child { border-right: none; }
-  .sponsor-tab-btn.active { color: #fff; background: rgba(177,17,22,0.3); }
-  .sponsor-tab-content { padding: 14px; font-size: 13px; color: #cbd5e1; line-height: 1.6; white-space: pre-line; min-height: 40px; }
+  .sponsor-box { border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 4px; }
+  .sponsor-row { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.07); transition: background 0.2s ease; cursor: default; }
+  .sponsor-row:last-child { border-bottom: none; }
+  .sponsor-row:hover { background: rgba(177,17,22,0.2); }
+  .sponsor-row-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ff5e62; margin-bottom: 5px; }
+  .sponsor-row-content { font-size: 13px; color: #cbd5e1; line-height: 1.6; white-space: pre-line; }
 
   .msg { padding: 40px; text-align: center; color: rgba(255,255,255,0.4); font-family: 'Outfit', sans-serif; }
 </style>
@@ -64,42 +61,29 @@
     window.parent.postMessage({ iframeHeight: h }, '*');
   }
 
-  function makeTabs(g, h, i, uid) {
-    // Only show tabs box if at least one has content
+  function makeSponsorBox(g, h, i) {
     if (!g && !h && !i) return '';
-    var tabs = [
+    var rows = [
       { label: 'X',             content: g },
       { label: 'Session Chair', content: h },
       { label: 'Gold +',        content: i }
-    ].filter(function(t) { return t.content; });
-
-    if (tabs.length === 0) return '';
-
-    var navHtml = tabs.map(function(t, idx) {
-      return '<button class="sponsor-tab-btn' + (idx === 0 ? ' active' : '') + '" onclick="switchTab(this,\'' + uid + '\',' + idx + ')">' + t.label + '</button>';
-    }).join('');
-
-    var contentHtml = tabs.map(function(t, idx) {
-      return '<div class="sponsor-tab-content" id="tab-' + uid + '-' + idx + '" style="display:' + (idx === 0 ? 'block' : 'none') + '">' + t.content.replace(/\n/g, '<br>') + '</div>';
-    }).join('');
-
-    return '<div class="sponsor-tabs"><div class="sponsor-tab-nav">' + navHtml + '</div>' + contentHtml + '</div>';
-  }
-
-  function switchTab(btn, uid, idx) {
-    var nav = btn.parentElement;
-    nav.querySelectorAll('.sponsor-tab-btn').forEach(function(b) { b.classList.remove('active'); });
-    btn.classList.add('active');
-    var tabs = nav.parentElement.querySelectorAll('.sponsor-tab-content');
-    tabs.forEach(function(t) { t.style.display = 'none'; });
-    document.getElementById('tab-' + uid + '-' + idx).style.display = 'block';
-    setTimeout(sendHeight, 100);
+    ].filter(function(r) { return r.content; });
+    if (rows.length === 0) return '';
+    var html = '<div class="sponsor-box">';
+    rows.forEach(function(r) {
+      html += '<div class="sponsor-row">'
+            + '<div class="sponsor-row-label">' + r.label + '</div>'
+            + '<div class="sponsor-row-content">' + r.content.replace(/\n/g, '<br>') + '</div>'
+            + '</div>';
+    });
+    return html + '</div>';
   }
 
   function buildHTML(rows) {
     var html = '';
-    rows.forEach(function(row, i) {
-      // Columns: A=Time, B=Session(eyebrow), C=Format(skip), D=Session Title, E=Description, F=Speaker, G=X, H=Session Chair, I=Gold+
+    rows.forEach(function(row) {
+      // Exact headers: A=Time, B=Session(eyebrow), C=Format(skip),
+      // D=Session Title(main), E=Description, F=speaker, G=x, H=Session Chair, I=Gold+
       var time  = (row['Time']          || '').trim();
       var eye   = (row['Session']       || '').trim();
       var title = (row['Session Title'] || '').trim();
@@ -107,28 +91,27 @@
       var spk   = (row['speaker']       || '').trim();
       var g     = (row['x']             || '').trim();
       var h     = (row['Session Chair'] || '').trim();
-      var ii    = (row['Gold +']        || '').trim();
+      var i     = (row['Gold +']        || '').trim();
 
       if (!time && !title) return;
 
-      var uid = 'r' + i;
-      var tabsHtml = makeTabs(g, h, ii, uid);
-
+      var sponsorHtml = makeSponsorBox(g, h, i);
       var bodyHtml = '';
-      if (desc) bodyHtml += '<div class="acc-description">' + desc.replace(/\n/g, '<br>') + '</div>';
-      if (spk)  bodyHtml += '<div class="acc-speaker"><strong>Speakers</strong>' + spk.replace(/\n/g, '<br>') + '</div>';
-      if (tabsHtml) bodyHtml += tabsHtml;
+      if (desc)        bodyHtml += '<div class="acc-description">' + desc.replace(/\n/g, '<br>') + '</div>';
+      if (spk)         bodyHtml += '<div class="acc-speaker"><strong>Speakers</strong>' + spk.replace(/\n/g, '<br>') + '</div>';
+      if (sponsorHtml) bodyHtml += sponsorHtml;
 
       var hasContent = bodyHtml.length > 0;
 
       html += '<div class="accordion-item">'
-            + '<button class="accordion-header"' + (hasContent ? ' onclick="toggleAcc(this)"' : '') + ' style="' + (!hasContent ? 'cursor:default;' : '') + '">'
+            + '<button class="accordion-header"'
+            + (hasContent ? ' onclick="toggleAcc(this)"' : ' style="cursor:default;"') + '>'
             + '<span class="acc-time">' + time + '</span>'
             + '<div class="acc-header-content">'
             + (eye ? '<span class="acc-eyebrow">' + eye + '</span>' : '')
             + '<span class="acc-title">' + (title || '—') + '</span>'
             + '</div>'
-            + (hasContent ? '<span class="acc-icon">+</span>' : '<span class="acc-icon" style="opacity:0">+</span>')
+            + '<span class="acc-icon" style="' + (!hasContent ? 'opacity:0;' : '') + '">+</span>'
             + '</button>'
             + '<div class="accordion-content"><div class="content-inner">' + bodyHtml + '</div></div>'
             + '</div>';
@@ -138,8 +121,7 @@
 
   function loadDay(sheet, elementId) {
     var el = document.getElementById(elementId);
-    var url = BASE_URL + '?sheet=' + encodeURIComponent(sheet);
-    fetch(url)
+    fetch(BASE_URL + '?sheet=' + encodeURIComponent(sheet))
       .then(function(r) { return r.json(); })
       .then(function(rows) {
         el.innerHTML = buildHTML(rows);

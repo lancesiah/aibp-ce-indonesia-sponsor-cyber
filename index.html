@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; padding: 0; background: transparent; font-family: 'Outfit', sans-serif; }
+
+  .agenda-container { background: #212b5a; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(33,43,90,0.15); color: #fff; min-height: 450px; }
+  .day-nav { display: flex; background: rgba(0,0,0,0.2); }
+  .day-btn { flex: 1; padding: 20px; border: none; background: transparent; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px; color: rgba(255,255,255,0.5); transition: 0.2s; }
+  .day-btn.active { color: #fff; background: rgba(255,255,255,0.05); position: relative; }
+  .day-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #b11116; }
+
+  .accordion-item { border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .accordion-header { width: 100%; padding: 22px 20px; display: grid; grid-template-columns: 85px 1fr 24px; align-items: center; cursor: pointer; background: none; border: none; text-align: left; font-family: 'Outfit', sans-serif; }
+  .acc-time { font-weight: 700; color: #ff5e62; font-size: 13px; letter-spacing: 0.5px; }
+  .acc-title { font-weight: 700; color: #fff; font-size: 15px; line-height: 1.4; padding-right: 10px; }
+  .acc-icon { font-size: 22px; color: rgba(255,255,255,0.4); transition: transform 0.2s ease; }
+  .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: rgba(0,0,0,0.1); }
+  .content-inner { padding: 0 44px 22px 105px; font-size: 14px; color: #cbd5e1; line-height: 1.6; }
+  .accordion-item.is-open .acc-icon { transform: rotate(45deg); color: #ff5e62; }
+  .accordion-item.is-open .accordion-content { max-height: 500px; }
+  .msg { padding: 40px; text-align: center; color: rgba(255,255,255,0.4); font-family: 'Outfit', sans-serif; }
+</style>
+</head>
+<body>
+<div class="agenda-container">
+  <div class="day-nav">
+    <button id="btn-day1" class="day-btn active" onclick="switchDay('day1')">Day 1: 26 Aug</button>
+    <button id="btn-day2" class="day-btn" onclick="switchDay('day2')">Day 2: 27 Aug</button>
+  </div>
+  <div id="day1" class="agenda-day" style="display:block;"><div class="msg">Loading...</div></div>
+  <div id="day2" class="agenda-day" style="display:none;"><div class="msg">Loading...</div></div>
+</div>
+
+<script>
+  // Tab names exactly as they appear in your Google Sheet
+  var DAY1_SHEET = 'Day 1: 26 August';
+  var DAY2_SHEET = 'Day 2: 27 August';
+  var BASE_URL   = 'https://sheetdb.io/api/v1/aii6pr8cqy9d1';
+
+  function buildHTML(rows) {
+    var html = '';
+    rows.forEach(function(row) {
+      var time  = (row['Time']        || '').trim();
+      var title = (row['Session']     || '').trim();
+      var desc  = (row['Description'] || '').trim();
+      if (!time || !title) return;
+      html += '<div class="accordion-item">'
+            + '<button class="accordion-header" onclick="toggleAcc(this)">'
+            + '<span class="acc-time">' + time + '</span>'
+            + '<span class="acc-title">' + title + '</span>'
+            + '<span class="acc-icon">+</span>'
+            + '</button>'
+            + '<div class="accordion-content"><div class="content-inner">' + desc + '</div></div>'
+            + '</div>';
+    });
+    return html || '<div class="msg">No sessions found.</div>';
+  }
+
+  function loadDay(sheet, elementId) {
+    var el = document.getElementById(elementId);
+    var url = BASE_URL + '?sheet=' + encodeURIComponent(sheet);
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(rows) { el.innerHTML = buildHTML(rows); })
+      .catch(function() { el.innerHTML = '<div class="msg" style="color:#ff5e62;">Failed to load. Please refresh.</div>'; });
+  }
+
+  function switchDay(id) {
+    document.querySelectorAll('.agenda-day').forEach(function(d) { d.style.display = 'none'; });
+    document.querySelectorAll('.day-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById(id).style.display = 'block';
+    document.getElementById(id === 'day1' ? 'btn-day1' : 'btn-day2').classList.add('active');
+  }
+
+  function toggleAcc(btn) {
+    var item = btn.parentElement;
+    var isOpen = item.classList.contains('is-open');
+    item.parentElement.querySelectorAll('.accordion-item').forEach(function(i) { i.classList.remove('is-open'); });
+    if (!isOpen) item.classList.add('is-open');
+  }
+
+  // Load both days on page load
+  loadDay(DAY1_SHEET, 'day1');
+  loadDay(DAY2_SHEET, 'day2');
+</script>
+</body>
+</html>
